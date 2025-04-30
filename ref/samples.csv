@@ -1,0 +1,7 @@
+sample_id,condition,replicate,input_control,peak_mode,notes
+GSF2801-ChIPseq-OVCAR3-3D-Input_S6,Input,1,,,Input control sample
+GSF2801-ChIPseq-OVCAR3-3D-IP-cJun_S4,cJUN,1,GSF2801-ChIPseq-OVCAR3-3D-Input_S6,narrow,3D-cJUN
+GSF2801-ChIPseq-OVCAR3-3D-IP-IgG_S5,Igg,1,GSF2801-ChIPseq-OVCAR3-3D-Input_S6,narrow,3D-Igg
+GSF2801-ChIPseq-OVCAR3-Control-Input_S3,Input,1,,,Input control sample
+GSF2801-ChIPseq-OVCAR3-Control-IP-cJun_S1,cJUN,1,GSF2801-ChIPseq-OVCAR3-Control-Input_S3,narrow,Ctrl-cJUN
+GSF2801-ChIPseq-OVCAR3-Control-IP-IgG_S2,Igg,1,GSF2801-ChIPseq-OVCAR3-Control-Input_S3,narrow,Ctrl-Igg
