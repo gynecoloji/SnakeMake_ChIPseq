@@ -99,7 +99,7 @@ conda env create -f envs/snakemake.yaml
 
 ```bash
 # Run with 8 cores
-snakemake --cores 8 --use-conda -s snakefile
+snakemake --cores 8 --use-conda -s snakefile_tolerant_ChIPseq
 
 ```
 
