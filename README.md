@@ -67,8 +67,8 @@ The workflow consists of several key components:
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/ChIPseq-Pipeline.git
-cd ChIPseq-Pipeline
+git clone https://github.com/gynecoloji/SnakeMake_ChIPseq.git
+cd SnakeMake_ChIPseq
 ```
 
 Create the snakemake conda environment:
@@ -133,6 +133,8 @@ results/
 ├── filtered/                 # Filtered BAM files and flagstat reports
 ├── dedup/                    # Deduplicated BAM files
 ├── blacklist_filtered/       # Blacklist-filtered BAM files
+├── bigwig/                   # RPGC normalized bigwig files
+├── normalized_bigwig/        # normalized to input bigwig files
 ├── peaks/                    # Peak calling results (narrow and broad)
 └── qc/                       # QC reports including blacklist filtering stats
 ```
