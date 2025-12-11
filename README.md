@@ -143,14 +143,9 @@ conda env create -f envs/snakemake.yaml
 4. Run the workflow:
 
 ```bash
-# Dry run to verify
-snakemake -n
-
 # Run with 8 cores
-snakemake --cores 8 --use-conda
+snakemake --cores 8 --use-conda -s snakefile
 
-# Run on cluster with SLURM
-snakemake --use-conda --cluster "sbatch --mem=16g --cpus-per-task={threads}" --jobs 20
 ```
 
 ## 📁 Input Requirements
@@ -214,6 +209,9 @@ The pipeline uses a CSV file (samples.csv) with 6 columns to manage samples and 
   - Max fragment length: 3000bp
   - Mixed/discordant alignments: disabled
   - Spliced alignment: disabled (ChIP-seq specific)
+  - Tolerant mode (added parameters): --score-min L,0,-0.6 \
+                                      --mp 4,2 \
+                                      --rdg 5,3 --rfg 5,3
 
 - **Samtools**:
   - Filtering: Properly paired reads (0x2) and primary alignments (-F 0x100)
