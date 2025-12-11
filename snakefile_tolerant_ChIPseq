@@ -23,6 +23,8 @@ DEDUP_DIR = f"{RESULT_DIR}/dedup"
 BLACKLIST_FILTERED_DIR = f"{RESULT_DIR}/blacklist_filtered"
 PEAKS_DIR = f"{RESULT_DIR}/peaks"
 QC_DIR = f"{RESULT_DIR}/qc"
+BIGWIG_DIR = f"{RESULT_DIR}/bigwig"
+NORMALIZED_BIGWIG_DIR = f"{RESULT_DIR}/normalized_bigwig"
 
 
 # Specify that certain rules should be run locally
@@ -90,7 +92,12 @@ rule all:
         expand(f"{PEAKS_DIR}/{{sample}}_peaks.broadPeak", sample=BROAD_SAMPLES),
         
         # Blacklist filtering statistics
-        f"{QC_DIR}/blacklist_filtering_stats.txt"
+        f"{QC_DIR}/blacklist_filtering_stats.txt",
+        
+        # Normalized
+        # bigwig files
+        expand(f"{BIGWIG_DIR}/{{sample}}.bw", sample=SAMPLES),
+        expand(f"{NORMALIZED_BIGWIG_DIR}/{{sample}}.normalized.bw", sample=[s for s in SAMPLES if s in INPUT_CONTROLS])
 
 # FastQC on raw reads
 rule fastqc:
@@ -215,7 +222,6 @@ rule remove_duplicates:
         samtools index {output.dedup_bam}
         """
 
-# Filter against blacklist regions
 # Filter against blacklist regions
 rule filter_blacklist:
     priority: 10
@@ -416,3 +422,63 @@ rule blacklist_stats:
         "logs/blacklist_stats/summary.log"
     script:
         "ref/blacklist-stats-script.py"
+
+# Create bigwig files for all samples (both ChIP and input)
+rule create_bigwig:
+    priority: 130
+    input:
+        bam = f"{BLACKLIST_FILTERED_DIR}/{{sample}}.nobl.bam",
+        bai = f"{BLACKLIST_FILTERED_DIR}/{{sample}}.nobl.bam.bai"
+    output:
+        bigwig = f"{BIGWIG_DIR}/{{sample}}.bw"
+    params:
+        effective_genome_size = config["effective_genome_size"],
+        bin_size = 25,
+        blacklist = config["blacklist"]
+    threads: 8
+    conda:
+        "envs/deeptools.yaml"
+    log:
+        "logs/bigwig/{sample}.log"
+    shell:
+        """
+        mkdir -p {BIGWIG_DIR} logs/bigwig
+        
+        bamCoverage --bam {input.bam} \
+            --normalizeUsing RPGC \
+            --effectiveGenomeSize {params.effective_genome_size} \
+            --binSize {params.bin_size} \
+            --numberOfProcessors {threads} \
+            --outFileName {output.bigwig} \
+            --outFileFormat bigwig \
+            --extendReads \
+            --blackListFileName {params.blacklist} > {log} 2>&1
+        """
+
+rule create_normalized_bigwig:
+    priority: 131
+    input:
+        signal_bw = f"{BIGWIG_DIR}/{{sample}}.bw",
+        input_bw = lambda wildcards: f"{BIGWIG_DIR}/{INPUT_CONTROLS[wildcards.sample]}.bw" if wildcards.sample in INPUT_CONTROLS else []
+    output:
+        normalized_bw = f"{NORMALIZED_BIGWIG_DIR}/{{sample}}.normalized.bw"
+    params:
+        bin_size = 25,
+        pseudocount = 1
+    threads: 8
+    conda:
+        "envs/deeptools.yaml"
+    log:
+        "logs/normalized_bigwig/{sample}.log"
+    shell:
+        """
+        mkdir -p {NORMALIZED_BIGWIG_DIR} logs/normalized_bigwig
+        
+        bigwigCompare -b1 {input.signal_bw} \
+            -b2 {input.input_bw} \
+            --operation ratio \
+            --binSize {params.bin_size} \
+            --numberOfProcessors {threads} \
+            --pseudocount {params.pseudocount} \
+            -o {output.normalized_bw} > {log} 2>&1
+        """
