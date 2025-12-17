@@ -9,3 +9,4 @@ hisat2_index: "ref/ENSEMBL/genome"
 
 # Blacklist regions file
 blacklist: "ref/hg38_blacklist_regions.bed"
+effective_genome_size: 2913022398
